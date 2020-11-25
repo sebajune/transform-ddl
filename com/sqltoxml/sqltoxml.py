@@ -8,7 +8,7 @@ from sqlparse import tokens as T
 
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree, Element, SubElement
-from Lib.pickle import TRUE
+from Lib.pickle import TRUE, NONE
 
 def find_table_datamart(elem, table_name):
     for el in elem.iter("ns1:datamartClass"):
@@ -18,7 +18,6 @@ def find_table_datamart(elem, table_name):
     return None
             
 def find_column_classattribute(elem, column_name):
-
     for el in elem.iter("ns1:classAttribute"):
         for el2 in el.iter("ns1:mnemonic"):
             if el2.text == column_name:
@@ -28,6 +27,15 @@ def find_column_classattribute(elem, column_name):
 def find_description(elem):
     for el in elem.iter("ns1:description"):
         return el
+    return None
+
+def find_columntype_in_table(elem, column_name):
+    for el in elem.iter("ns1:classAttribute"):
+        for el2 in el.iter("ns1:mnemonic"):
+            if el2.text == column_name:
+                for el3 in el.iter("ns1:type"):
+                    for el4 in el3.iter("ns1:value"):
+                        return el4.text
     return None
 
 if __name__ == '__main__':
@@ -116,6 +124,11 @@ if __name__ == '__main__':
             if is_alter_stmt and is_tablenamefound and token.value.upper() == 'CONSTRAINT' and not is_constraintfound:
                 is_constraintfound = True
                 continue
+            if is_alter_stmt and is_tablenamefound and is_constraintfound and prevtoken.value.upper() == 'KEY':
+                print(f"{token.ttype}: {token.value}")
+                fkeystxt = token.value
+                fkeys = [x.strip() for x in fkeystxt[fkeystxt.find("(")+1:fkeystxt.rfind(")")].split(",")]
+                print(fkeys)
             if is_alter_stmt and is_tablenamefound and is_constraintfound and prevtoken.value.upper() == 'REFERENCES' and not is_referencedtablenamefound:
                 is_referencedtablenamefound = True
                 referencedtablename = token.value.split(" ")[0].strip()
@@ -123,6 +136,20 @@ if __name__ == '__main__':
                 parentclassrefclassmnemonic.text = referencedtablename
                 parentclassrefdatamartmnemonic = SubElement(parentclassref, "ns1:datamartMnemonic")
                 parentclassrefdatamartmnemonic.text = 'DM1'
+                #print(f"{token.ttype}: {token.value}")
+                for fkey in fkeys:
+                    keyreference = SubElement(parentclassref, "ns1:keyReference")
+                    keyreferenceid = SubElement(keyreference, "ns1:id")
+                    keyreferenceid.text = '00000000-0000-0000-0000-000000000000'
+                    keyreferencemnemonic = SubElement(keyreference, "ns1:mnemonic")
+                    keyreferencemnemonic.text = fkey
+                    keyreferencedescription = SubElement(keyreference, "ns1:description")
+                    keyreferencedescription.text = fkey
+                    keyreferencetype = SubElement(keyreference, "ns1:type")
+                    keyreferencetypeid = SubElement(keyreferencetype, "ns1:id")
+                    keyreferencetypeid.text = '00000000-0000-0000-0000-000000000000'
+                    keyreferencetypevalue = SubElement(keyreferencetype, "ns1:value")
+                    keyreferencetypevalue.text = find_columntype_in_table(altertabledatamartclass, fkey)
                 continue
             if token.value == ';':
                 is_alter_stmt = False
@@ -168,6 +195,8 @@ if __name__ == '__main__':
                 is_comment_stmt = False
                 is_commentontable = False
                 is_commentoncolumn = False
+                altertabledatamartclass = None 
+                altertableclassattribute = None
             if i != 0:
                 prevtoken = token
                 

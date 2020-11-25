@@ -21,7 +21,7 @@ comment on table LegalPerson is
 comment on column LegalPerson.LpOGRN is
 'Основной государственный регистрационный номер юридического лица';
 
-comment on column LegalPerson.LpcOGRNDate is
+comment on column LegalPerson.LpOGRNDate is
 'Дата присвоения ОГРН. Для ЮЛ, созданных после 01.07.2002 г., является датой регистрации ЮЛ';
 
 
