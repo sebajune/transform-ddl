@@ -1,31 +1,188 @@
-create table DictOKVED (
-   CodeId               VARCHAR(8)           not null,
-   CodeVersion          VARCHAR(10)          not null,
-   CodeName             VARCHAR(1000)        not null,
-   constraint PK_DICTOKVED primary key (CodeId, CodeVersion)
+/*==============================================================*/
+/* DBMS name:      ADABAS D                                     */
+/* Created on:     03.12.2020 18:28:21                          */
+/*==============================================================*/
+
+
+drop table Address;
+
+drop table EstateРћbject;
+
+drop table IdentityDocument;
+
+drop table InfoPersonRight;
+
+drop table InfoProperty;
+
+drop table InfoRestriction;
+
+drop table "InfoRight(array)";
+
+/*==============================================================*/
+/* Table: Address                                               */
+/*==============================================================*/
+create table Address (
+ReadableAddress MultiLiner,
+NoteAddress MultiLiner(1000),
+AddressTypeCode varchar(50),
+TypeValueAddress varchar(100),
+FIAS varchar(20) not null,
+RecordNumber varchar(30) not null,
+RecordNumberInf varchar(30),
+KLADRCode varchar(50),
+Oktmo varchar(50),
+PostalCode varchar(50),
+RegionCode varchar(50),
+RegionValue varchar(100),
+DistrictType varchar(50),
+DistrictName varchar(150),
+CityType varchar(150),
+CityName varchar(100),
+UrbanDistricType varchar(100),
+UrbanDistricName varchar(150),
+SovietVillagType varchar (100),
+NameSovietVill varchar(100),
+LocalityType varchar(50),
+LocalityName varchar(200),
+StreetType varchar(100),
+StreetName varchar(150),
+Level1Type varchar(100),
+Level1Name varchar(100),
+Level2Type varchar(150),
+Level2Name varchar(100),
+Level3Type varchar(50),
+Level3Name varchar(50),
+ApartmentType varchar(50),
+ApartmentName varchar(50),
+Other varchar(100),
+primary key (FIAS, RecordNumber)
 );
 
-comment on table DictOKVED is
-'Общероссийский классификатор видов экономической деятельности ОКВЭД ';
-create table LegalPerson (
-   LpOGRN               VARCHAR(13)          not null,
-   LpOGRNDate           DATE                 not null,
-   OkvedBaseCode        VARCHAR(8)           null,
-   OkvedVersion         VARCHAR(10)          null,
-   constraint PK_LEGALPERSON primary key (LpOGRN)
+comment on table Address is
+'РђРґСЂРµСЃ РѕР±СЉРµРєС‚Р° РЅРµРґРІРёР¶РёРјРѕСЃС‚Рё';
+
+/*==============================================================*/
+/* Table: EstateРћbject                                          */
+/*==============================================================*/
+create table EstateРћbject (
+RecordNumber varchar(30),
+FIAS varchar(20),
+AddrRecordNumber varchar(30),
+Land varchar(255),
+Room varchar(255),
+EnterprisePropert varchar(255),
+RealEstateComple varchar(255),
+ObjectsUnderCons varchar(255),
+Constructions varchar(255),
+ParkingSpaces varchar(255),
+Building varchar(255)
 );
 
-comment on table LegalPerson is
-'Сведения о юридическом лице (ЮЛ)';
+/*==============================================================*/
+/* Table: IdentityDocument                                      */
+/*==============================================================*/
+create table IdentityDocument (
+DocCodeReferCode varchar(50),
+DocCodeTxt varchar(50),
+DocumentName varchar(100),
+DocSeries varchar(50),
+DocNumber varchar(20),
+DocDate date,
+Issuer varchar(100),
+DivisionCode varchar(100),
+SNILS varchar (15) not null,
+primary key (SNILS)
+);
 
-comment on column LegalPerson.LpOGRN is
-'Основной государственный регистрационный номер юридического лица';
+/*==============================================================*/
+/* Table: InfoPersonRight                                       */
+/*==============================================================*/
+create table InfoPersonRight (
+LastName varchar(100),
+FirstName varchar(100),
+MiddleName varchar(100),
+BirthDate date,
+RightRegNumber varchar(30),
+SNILS varchar (15) not null,
+primary key (SNILS)
+);
 
-comment on column LegalPerson.LpOGRNDate is
-'Дата присвоения ОГРН. Для ЮЛ, созданных после 01.07.2002 г., является датой регистрации ЮЛ';
+comment on table InfoPersonRight is
+'РЎРІРµРґРµРЅРёСЏ Рѕ Р»РёС†Рµ, Р·Р° РєРѕС‚РѕСЂС‹Рј Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРѕ РїСЂР°РІРѕ РЅР° РѕР±СЉРµРєС‚ РЅРµРґРІРёР¶РёРјРѕСЃС‚Рё
+РРЅС„РѕСЂРјР°С†РёСЏ Рѕ Р»РёС†Рµ, РІ РїРѕР»СЊР·Сѓ РєРѕС‚РѕСЂРѕРіРѕ СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹ РѕРіСЂР°РЅРёС‡РµРЅРёСЏ РїСЂР°РІР° Рё РѕР±СЂРµРјРµРЅРµРЅРёСЏ РѕР±СЉРµРєС‚Р° РЅРµРґРІРёР¶РёРјРѕСЃС‚Рё (РјР°СЃСЃРёРІ)';
 
+/*==============================================================*/
+/* Table: InfoProperty                                          */
+/*==============================================================*/
+create table InfoProperty (
+RecordNumber varchar(30) not null,
+RegistrationDate date,
+TypeCode varchar(20),
+PropertyTypeValue varchar(20),
+CancelDate date,
+primary key (RecordNumber)
+);
 
-alter table LegalPerson
-   add constraint FK_LEGALPER_REFERENCE_DICTOKVE foreign key (OkvedBaseCode, OkvedVersion)
-      references DictOKVED (CodeId, CodeVersion)
-      on delete restrict on update restrict;
+/*==============================================================*/
+/* Table: InfoRestriction                                       */
+/*==============================================================*/
+create table InfoRestriction (
+RightRestricRegNum varchar(15),
+RightRestRegNumCod varchar(15),
+RightRestRegNumVal varchar(20),
+RegDate date,
+NumberRight varchar(30) not null,
+FIAS varchar(20),
+RecordNumber varchar(30),
+primary key (NumberRight)
+);
+
+comment on table InfoRestriction is
+'РЎРІРµРґРµРЅРёСЏ РѕР± РѕРіСЂР°РЅРёС‡РµРЅРёРё РїСЂР°РІР°, РѕР±СЂРµРјРµРЅРµРЅРёРё РѕР±СЉРµРєС‚Р° РЅРµРґРІРёР¶РёРјРѕСЃС‚Рё';
+
+/*==============================================================*/
+/* Table: "InfoRight(array)"                                    */
+/*==============================================================*/
+create table "InfoRight(array)" (
+RightRegNumber varchar(30) not null,
+RightType varchar(100),
+RightCode varchar(30),
+RegDate date,
+primary key (RightRegNumber)
+);
+
+alter table Address
+   add foreign key FK_ADDR_REFE_INFO (RecordNumberInf)
+      references InfoProperty (RecordNumber)
+      on delete restrict;
+
+alter table EstateРћbject
+   add foreign key FK_ESTA_REFE_ADDR (FIAS, AddrRecordNumber)
+      references Address (FIAS, RecordNumber)
+      on delete restrict;
+
+alter table EstateРћbject
+   add foreign key FK_ESTA_REFE_INFO (RecordNumber)
+      references InfoProperty (RecordNumber)
+      on delete restrict;
+
+alter table InfoPersonRight
+   add foreign key FK_INFO_REFE_INFO (RightRegNumber)
+      references InfoRestriction (NumberRight)
+      on delete restrict;
+
+alter table InfoPersonRight
+   add foreign key FK_INFO_REFE_IDEN (SNILS)
+      references IdentityDocument (SNILS)
+      on delete restrict;
+
+alter table InfoRestriction
+   add foreign key FK_INFO_REFE_ADDR (FIAS, RecordNumber)
+      references Address (FIAS, RecordNumber)
+      on delete restrict;
+
+alter table "InfoRight(array)"
+   add foreign key FK_INFO_REFE_INFO (RightRegNumber)
+      references InfoRestriction (NumberRight)
+      on delete restrict;
+
