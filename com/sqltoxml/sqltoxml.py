@@ -17,6 +17,7 @@ import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree, Element, SubElement
 from pickle import TRUE, NONE
 from hashlib import md5
+import argparse
 
 def find_table_datamart(elem, table_name):
     for el in elem.iter("ns1:datamartClass"):
@@ -52,7 +53,7 @@ def find_columntype_in_table(elem, column_name):
 def add_version(datamart):
     version = SubElement(datamart, 'ns1:version')
     major = SubElement(version, 'ns1:major')
-    major.text = '1'
+    major.text = args.version
     minor = SubElement(version, 'ns1:minor')
     minor.text = '0'
 
@@ -60,7 +61,7 @@ def add_versions_block(metadata):
     versions = SubElement(metadata, 'ns1:versions')
     version = SubElement(versions, 'ns1:version')
     major = SubElement(version, 'ns1:major')
-    major.text = '1'
+    major.text = args.version
     minor = SubElement(version, 'ns1:minor')
     minor.text = '0'
     supportedFrom = SubElement(versions, 'ns1:supportedFrom')
@@ -96,7 +97,7 @@ def add_primary_key():
     pkeystxt = ' '.join(c[4:])
     if c_name.upper() == 'PRIMARY':
         pkeystxt = ' '.join(c[2:])
-    endpkeystxt = pkeystxt.rfind(")") if pkeystxt.rfind(")") > 0 else len(pkeystxt)
+    endpkeystxt = pkeystxt.find(")") if pkeystxt.rfind(")") > 0 else len(pkeystxt)
     pkeys = [x.strip() for x in pkeystxt[pkeystxt.find("(")+1:endpkeystxt].split(",")]
     for pkey in pkeys:
         columnnamepkey = format_name(pkey)
@@ -220,8 +221,16 @@ def add_comment(tokens):
 if __name__ == '__main__':
     #with open ("com/sqltoxml/test/test.sql", "r") as myfile:
     #with open ("/home/artemeos/Загрузки/Telegram Desktop/create_restrictions.sql", "r") as myfile:
-    with open ("/home/artemeos/Загрузки/Telegram Desktop/gar_script_uniq_columns.sql", "r") as myfile:
+    with open ("/home/artemeos/Загрузки/Telegram Desktop/fns_dtm_scripts/egrul_create_dtm.sql", "r") as myfile:
         statements = sqlparse.parse(myfile, encoding='utf8') 
+        
+    parser = argparse.ArgumentParser(description='sqlToXml')
+    parser.add_argument("--schema", type=str, default="schemaName")
+    parser.add_argument("--version", type=str, default="1")
+    parser.add_argument("--tenantId", type=int, default=1)
+    args = parser.parse_args()
+
+    tenantId = args.tenantId
     
     top = Element('ns:PODDMetadataRequest')
     top.set('xmlns:ns', 'urn://x-artefacts-podd-gosuslugi-local/metadata/datamart/2/1.4')
@@ -232,6 +241,15 @@ if __name__ == '__main__':
     add_versions_block(metadata)
 
     datamart = SubElement(metadata, 'ns1:datamart')
+    schemaName = args.schema
+    datamartid = SubElement(datamart, "ns1:id")
+    datamartid.text = get_md5(schemaName)
+    datamartmnemonic = SubElement(datamart, "ns1:mnemonic")
+    datamartmnemonic.text = schemaName
+    datamartdescription = SubElement(datamart, "ns1:description")
+    datamartdescription.text = schemaName
+    datamartTenantId = SubElement(datamart, "ns1:tenantId")
+    datamartTenantId.text = '00000000-0000-0000-0000-000000000000'
     add_version(datamart)
     
     for statement in statements:
@@ -262,7 +280,7 @@ if __name__ == '__main__':
                 datamartclassdescription = SubElement(datamartclass, "ns1:description")
                 datamartclassdescription.text = mnemonic_value
     
-                columns = table_structure[table_structure.find(" (")+2:table_structure.rfind(")")-1].split(",\n") 
+                columns = re.split(",\s*\n", table_structure[table_structure.find(" (")+2:table_structure.rfind(")")-1])
                 columndef = {}
                 for column in columns:
                     c = shlex.split(' '.join(column.split()))
